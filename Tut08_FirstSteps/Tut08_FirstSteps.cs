@@ -29,7 +29,7 @@ namespace FuseeApp
         // Init is called on startup. 
         public override void Init()
         {
-            getCube(0, 7);
+            getCube(7);
              _scene = new SceneContainer();
 
             RC.ClearColor = new float4(1, 1, 1, 1);
@@ -37,14 +37,14 @@ namespace FuseeApp
 
 
         }
-        public SceneRendererForward getCube(int x, int ammount)
+        public SceneRendererForward getCube(int ammount)
         {
             int i = 0;
             _scene = new SceneContainer();
             while (i < ammount)
             {
 
-                _cubeTransform = new Transform { Scale = new float3(1, 1, 1), Translation = new float3(x + i * 10, 0, 0) };
+                _cubeTransform = new Transform { Scale = new float3(1, 1, 1), Translation = new float3(i * 10, 0, 0), Rotation = new float3(i*3,10*i,0) };
 
                 var cubeShader = MakeEffect.FromDiffuseSpecular((float4)ColorUint.Blue, float4.Zero);
                 var cubeMesh = SimpleMeshes.CreateCuboid(new float3(5, 5, 5));
