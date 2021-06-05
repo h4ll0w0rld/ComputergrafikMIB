@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "..\\Tut09_HierarchyAndInputCompleted"
+		}
+	],
+	"settings": {
+		"omnisharp.disableMSBuildDiagnosticWarning": true
+	}
+}

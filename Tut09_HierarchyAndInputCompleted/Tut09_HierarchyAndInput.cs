@@ -54,7 +54,7 @@ namespace FuseeApp
                 Translation = new float3(-2, 8, 0)
             };
 
-            // Setup the scene graph
+            // Setup the  scene graph
             return new SceneContainer
             {
                 Children = new List<SceneNode>

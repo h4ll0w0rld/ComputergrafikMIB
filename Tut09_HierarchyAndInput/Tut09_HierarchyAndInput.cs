@@ -22,9 +22,15 @@ namespace FuseeApp
         private SceneRendererForward _sceneRenderer;
         private float _camAngle = 0;
         private Transform _baseTransform;
+        private Transform _bodyTransform;
+        private Transform _upperArmTransform;
+        private Transform _foreArmTransform;
+        private Transform _hand1Transform;
+         private Transform _hand2Transform;
 
 
-       SceneContainer CreateScene()
+
+        SceneContainer CreateScene()
         {
             // Initialize transform components that need to be changed inside "RenderAFrame"
             _baseTransform = new Transform
@@ -33,27 +39,149 @@ namespace FuseeApp
                 Scale = new float3(1, 1, 1),
                 Translation = new float3(0, 0, 0)
             };
+            _bodyTransform = new Transform
+            {
+                Rotation = new float3(0, 0, 0),
+                Scale = new float3(1, 1, 1),
+                Translation = new float3(0, 6, 0)
+            };
+            _upperArmTransform = new Transform
+            {
+                Rotation = new float3(0, 0, 0),
+                Scale = new float3(1, 1, 1),
+                Translation = new float3(2, 4, 0),
+            };
+            _foreArmTransform = new Transform
+            {
+                Rotation = new float3(0, 0, 0),
+                Scale = new float3(1, 1, 1),
+                Translation = new float3(-2, 8, 0),
+            };
+            _hand1Transform = new Transform
+            {
+                Rotation = new float3(0, 0, M.Pi/4),
+                Scale = new float3(1, 1, 1),
+                Translation = new float3(0, 8, 0),
+            };
+            _hand2Transform= new Transform{
+                Rotation = new float3(0,0,-M.Pi/4),
+                Scale = new float3(1,1,1),
+                Translation = new float3(0,8,0)
+            };
+            
 
             // Setup the scene graph
             return new SceneContainer
             {
                 Children = new List<SceneNode>
+            {
+                // GREY BASE
+                new SceneNode
                 {
-                    new SceneNode
+                    Components = new List<SceneComponent>
                     {
-                        Components = new List<SceneComponent>
-                        {
-                            // TRANSFORM COMPONENT
-                            _baseTransform,
+                        // TRANSFORM COMPONENT
+                        _baseTransform,
 
-                            // SHADER EFFECT COMPONENT
-                            MakeEffect.FromDiffuseSpecular((float4) ColorUint.LightGrey, float4.Zero),
+                        // SHADER EFFECT COMPONENT
+                        MakeEffect.FromDiffuseSpecular((float4) ColorUint.LightGrey, float4.Zero),
 
-                            // MESH COMPONENT
-                            SimpleMeshes.CreateCuboid(new float3(10, 2, 10))
+                        // MESH COMPONENT
+                        SimpleMeshes.CreateCuboid(new float3(10, 2, 10))
+                    }
+                },
+                // RED BODY
+                new SceneNode
+                {
+                    Components = new List<SceneComponent>
+                    {
+                        _bodyTransform,
+                        MakeEffect.FromDiffuseSpecular((float4) ColorUint.Red, float4.Zero),
+                        SimpleMeshes.CreateCuboid(new float3(2, 10, 2))
+                    },
+                    Children = new ChildList{
+                        new SceneNode{
+                            Components = new List<SceneComponent>{
+                                _upperArmTransform
+                            },
+                            Children = new ChildList
+                                {
+                                    new SceneNode
+                                    {
+                                        Components = new List<SceneComponent>
+                                        {
+                                            new Transform
+                                            {
+                                                Rotation = new float3(0, 0, 0),
+                                                Scale = new float3(1, 1, 1),
+                                                Translation = new float3(0, 4, 0)
+                                            },
+                                            MakeEffect.FromDiffuseSpecular((float4) ColorUint.Green, float4.Zero),
+                                            SimpleMeshes.CreateCuboid(new float3(2, 10, 2))
+                                        }
+                                    },
+                                    new SceneNode{
+                                        Components = new List<SceneComponent>{
+                                            _foreArmTransform
+                                        },
+                                        Children = new ChildList{
+                                            new SceneNode{
+                                                Components = new List<SceneComponent>{
+                                                    new Transform{
+                                                        Rotation = new float3(0,0,0),
+                                                        Scale = new float3(1,1,1),
+                                                        Translation = new float3(0,4,0),
+                                                    },
+                                                      MakeEffect.FromDiffuseSpecular((float4) ColorUint.Blue, float4.Zero),
+                                                     SimpleMeshes.CreateCuboid(new float3(2, 10, 2))
+                                                }
+                                            },
+                                            new SceneNode{
+                                                Components = new List<SceneComponent>{
+                                                    _hand1Transform
+                                                },
+                                                Children = new ChildList{
+                                                    new SceneNode{
+                                                        Components = new List<SceneComponent>{
+                                                            new Transform{
+                                                                  Rotation = new float3(0,0,0),
+                                                        Scale = new float3(1,1,1),
+                                                        Translation = new float3(0,2,0),
+                                                            },
+                                                              MakeEffect.FromDiffuseSpecular((float4) ColorUint.Pink, float4.Zero),
+                                                                SimpleMeshes.CreateCuboid(new float3(1, 4, 1))
+
+                                                        }
+                                                    }
+                                                }
+
+                                            },
+                                            new SceneNode{
+                                                Components = new List<SceneComponent>{
+                                                    _hand2Transform
+                                                },
+                                                Children = new ChildList{
+                                                    new SceneNode{
+                                                        Components = new List<SceneComponent>{
+                                                            new Transform{
+                                                                Rotation = new float3(0,0,0),
+                                                                Scale = new float3(1,1,1),
+                                                                Translation = new float3(0,2,0),
+                                                            },
+                                                            MakeEffect.FromDiffuseSpecular((float4) ColorUint.Pink, float4.Zero),
+                                                                SimpleMeshes.CreateCuboid(new float3(1, 4, 1))
+
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
                         }
                     }
                 }
+            }
+        }
             };
         }
 
@@ -74,12 +202,40 @@ namespace FuseeApp
         public override void RenderAFrame()
         {
             SetProjectionAndViewport();
-            
+
             // Clear the backbuffer
             RC.Clear(ClearFlags.Color | ClearFlags.Depth);
 
             // Setup the camera 
             RC.View = float4x4.CreateTranslation(0, -10, 50) * float4x4.CreateRotationY(_camAngle);
+
+            _bodyTransform.Rotation.y += Keyboard.LeftRightAxis * Time.DeltaTime;
+
+            _upperArmTransform.Rotation.x += Keyboard.UpDownAxis * Time.DeltaTime;
+
+            _foreArmTransform.Rotation.x += Keyboard.ADAxis * Time.DeltaTime;
+
+
+            if (Mouse.LeftButton)
+            {
+
+                _camAngle += Mouse.Velocity.x * Time.DeltaTime / 6;
+
+            }
+            else if (!Mouse.LeftButton && Mouse.Velocity.x > 0)
+            {
+                _camAngle -= 1 * Time.DeltaTime;
+            }
+            if(Mouse.RightButton && _hand1Transform.Rotation.z >-0.2f)
+            {
+                _hand1Transform.Rotation += new float3(0,0,-0.2f);
+                _hand2Transform.Rotation += new float3(0,0,0.2f);
+
+            }
+            else if (!Mouse.RightButton && _hand1Transform.Rotation.z <= M.Pi/4 ){
+                 _hand1Transform.Rotation += new float3(0,0,0.2f);
+                   _hand2Transform.Rotation += new float3(0,0,-0.2f);
+            }
 
             // Render the scene on the current render context
             _sceneRenderer.Render(RC);
@@ -101,6 +257,6 @@ namespace FuseeApp
             // Back clipping happens at 2000 (Anything further away from the camera than 2000 world units gets clipped, polygons will be cut)
             var projection = float4x4.CreatePerspectiveFieldOfView(M.PiOver4, aspectRatio, 1, 20000);
             RC.Projection = projection;
-        }        
+        }
     }
 }
