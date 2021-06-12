@@ -24,7 +24,7 @@ namespace FuseeApp
         private Transform _baseTransform;
         private Transform _bodyTransform;
         private Transform _upperArmTransform;
-        private Transform _foreArmTransform;
+
 
         SceneContainer CreateScene()
         {
@@ -37,113 +37,79 @@ namespace FuseeApp
             };
             _bodyTransform = new Transform
             {
-                Rotation = new float3(0, 1.2f, 0),
+                Rotation = new float3(0, 0, 0),
                 Scale = new float3(1, 1, 1),
                 Translation = new float3(0, 6, 0)
             };
             _upperArmTransform = new Transform
             {
-                Rotation = new float3(0.8f, 0, 0),
+                Rotation = new float3(0, 0, 0),
                 Scale = new float3(1, 1, 1),
                 Translation = new float3(2, 4, 0)
             };
-            _foreArmTransform = new Transform
-            {
-                Rotation = new float3(0.8f, 0, 0),
-                Scale = new float3(1, 1, 1),
-                Translation = new float3(-2, 8, 0)
-            };
 
-            // Setup the  scene graph
+            // Setup the scene graph
             return new SceneContainer
             {
                 Children = new List<SceneNode>
-                {
-                    // GREY BASE
-                    new SceneNode
-                    {
-                        Components = new List<SceneComponent>
-                        {
-                            // TRANSFROM COMPONENT
-                            _baseTransform,
+{
+// GREY BASE
+new SceneNode
+{
+Components = new List<SceneComponent>
+{
+// TRANSFORM COMPONENT
+_baseTransform,
 
-                            // SHADER EFFECT COMPONENT
-                            MakeEffect.FromDiffuseSpecular((float4) ColorUint.LightGrey, float4.Zero),
+// SHADER EFFECT COMPONENT
+MakeEffect.FromDiffuseSpecular((float4) ColorUint.LightGrey, float4.Zero),
 
-                            // MESH COMPONENT
-                            SimpleMeshes.CreateCuboid(new float3(10, 2, 10))
-                        }
-                    },
-                    // RED BODY
-                    new SceneNode
-                    {
-                        Components = new List<SceneComponent>
-                        {
-                            _bodyTransform,
-                            MakeEffect.FromDiffuseSpecular((float4) ColorUint.Red, float4.Zero),
-                            SimpleMeshes.CreateCuboid(new float3(2, 10, 2))
-                        },
-                        Children = new ChildList
-                        {
-                            // GREEN UPPER ARM
-                            new SceneNode
-                            {
-                                Components = new List<SceneComponent>
-                                {
-                                    _upperArmTransform,
-                                },
-                                Children = new ChildList
-                                {
-                                    new SceneNode
-                                    {
-                                        Components = new List<SceneComponent>
-                                        {
-                                            new Transform
-                                            {
-                                                Rotation = new float3(0, 0, 0),
-                                                Scale = new float3(1, 1, 1),
-                                                Translation = new float3(0, 4, 0)
-                                            },
-                                            MakeEffect.FromDiffuseSpecular((float4) ColorUint.Green, float4.Zero),
-                                            SimpleMeshes.CreateCuboid(new float3(2, 10, 2))
-                                        }
-                                    },
-                                    // BLUE FOREARM
-                                    new SceneNode
-                                    {
-                                        Components = new List<SceneComponent>
-                                        {
-                                            _foreArmTransform,
-                                        },
-                                        Children = new ChildList
-                                        {
-                                            new SceneNode
-                                            {
-                                                Components = new List<SceneComponent>
-                                                {
-                                                    new Transform
-                                                    {
-                                                        Rotation = new float3(0, 0, 0),
-                                                        Scale = new float3(1, 1, 1),
-                                                        Translation = new float3(0, 4, 0)
-                                                    },
-                                                    MakeEffect.FromDiffuseSpecular((float4) ColorUint.Blue, float4.Zero),
-                                                    SimpleMeshes.CreateCuboid(new float3(2, 10, 2))
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            },
-                        }
-                    }
-                }
+// MESH COMPONENT
+SimpleMeshes.CreateCuboid(new float3(10, 2, 10))
+}
+},
+
+// RED BODY
+new SceneNode
+{
+Components = new List<SceneComponent>
+{
+_bodyTransform,
+MakeEffect.FromDiffuseSpecular((float4) ColorUint.Red, float4.Zero),
+SimpleMeshes.CreateCuboid(new float3(2, 10, 2))
+},
+Children = new ChildList
+{
+// GREEN UPPER ARM
+new SceneNode
+{
+Components = new List<SceneComponent>
+{
+_upperArmTransform,
+},
+Children = new ChildList
+{
+new SceneNode
+{
+Components = new List<SceneComponent>
+{
+new Transform
+{
+Rotation = new float3(0, 0, 0),
+Scale = new float3(1, 1, 1),
+Translation = new float3(0, 4, 0)
+},
+MakeEffect.FromDiffuseSpecular((float4) ColorUint.Green, float4.Zero),
+SimpleMeshes.CreateCuboid(new float3(2, 10, 2))
+},
+}
+}
+}
+},
+}
+}
             };
-        }
-
-
-
-        // Init is called on startup. 
+        }// Init is called on startup. 
         public override void Init()
         {
             // Set the clear color for the backbuffer to white (100% intensity in all color channels R, G, B, A).
@@ -159,7 +125,7 @@ namespace FuseeApp
         public override void RenderAFrame()
         {
             SetProjectionAndViewport();
-            
+
             // Clear the backbuffer
             RC.Clear(ClearFlags.Color | ClearFlags.Depth);
 
@@ -186,6 +152,6 @@ namespace FuseeApp
             // Back clipping happens at 2000 (Anything further away from the camera than 2000 world units gets clipped, polygons will be cut)
             var projection = float4x4.CreatePerspectiveFieldOfView(M.PiOver4, aspectRatio, 1, 20000);
             RC.Projection = projection;
-        }        
+        }
     }
 }
