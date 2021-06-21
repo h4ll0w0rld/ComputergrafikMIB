@@ -52,7 +52,7 @@ namespace FuseeApp
 
                             // MESH COMPONENT
                             
-                            SimpleMeshes.CreateCylinder(7,10,7)                        }
+                            SimpleMeshes.CreateCylinder(7,10,9)                        }
                     },
                 }
             };
