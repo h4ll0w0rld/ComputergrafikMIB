@@ -25,7 +25,7 @@ namespace FuseeApp
 
         SceneContainer CreateScene()
         {
-             RC.SetRenderState(RenderState.FillMode, (uint) FillMode.Wireframe);
+            //RC.SetRenderState(RenderState.FillMode, (uint) FillMode.Wireframe);
              RC.SetRenderState(RenderState.CullMode, (uint)Cull.None);
             // Initialize transform components that need to be changed inside "RenderAFrame"
             _baseTransform = new Transform
@@ -52,7 +52,7 @@ namespace FuseeApp
 
                             // MESH COMPONENT
                             
-                            SimpleMeshes.CreateCylinder(7,10,9)                        }
+                            SimpleMeshes.CreateCylinder(7,10,5)                        }
                     },
                 }
             };
