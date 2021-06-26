@@ -21,13 +21,19 @@ namespace FuseeApp
     {
         private SceneContainer _scene;
         private SceneRendererForward _sceneRenderer;
-        private Transform _baseTransform;
+        private Transform _bodyTransform;
+        private Transform _transformRadHintenLinks, _transformRadHintenRechts, _transformRadVorneRechts, _transformRadVorneLinks, _schaufelTransform;
+        private SurfaceEffect _rightRearEffect;
+        private ScenePicker _scenePicker;
+        private PickResult _currentPick;
+        private float4 _oldColor;
+
 
 
         SceneContainer CreateScene()
         {
             // Initialize transform components that need to be changed inside "RenderAFrame"
-            _baseTransform = new Transform
+            _bodyTransform = new Transform
             {
                 Rotation = new float3(0, 0, 0),
                 Scale = new float3(1, 1, 1),
@@ -44,7 +50,7 @@ namespace FuseeApp
                         Components = new List<SceneComponent>
                         {
                             // TRANSFROM COMPONENT
-                            _baseTransform,
+                            _bodyTransform,
 
                             // SHADER EFFECT COMPONENT
                             SimpleMeshes.MakeMaterial((float4) ColorUint.LightGrey),
@@ -65,27 +71,100 @@ namespace FuseeApp
             RC.ClearColor = new float4(0.8f, 0.9f, 0.7f, 1);
 
             _scene = CreateScene();
+            _scene = AssetStorage.Get<SceneContainer>("Traktor.fus");
+
+            //Pick Parts of asset 
+            _rightRearEffect = _scene.Children.FindNodes((node) => node.Name == "Rad_hinten_links")?.FirstOrDefault()?.GetComponent<SurfaceEffect>();
+
+            _transformRadHintenLinks = _scene.Children.FindNodes(node => node.Name == "Rad_hinten_links")?.FirstOrDefault()?.GetTransform();
+            _transformRadHintenRechts = _scene.Children.FindNodes(node => node.Name == "Rad_hinten_rechts")?.FirstOrDefault()?.GetTransform();
+            _transformRadVorneLinks = _scene.Children.FindNodes(node => node.Name == "Rad_vorne_links")?.FirstOrDefault()?.GetTransform();
+            _transformRadVorneRechts = _scene.Children.FindNodes(node => node.Name == "Rad_vorne_rechts")?.FirstOrDefault()?.GetTransform();
+            //_schaufelTransform = _scene.Children.FindNodes(node => node.Name == "Schaufel")?.FirstOrDefault()?.GetTransform();
+
+
+
+            _bodyTransform = _scene.Children.FindNodes((node) => node.Name == "Traktor")?.FirstOrDefault()?.GetTransform();
+
+
+            // _rightRearEffect = _scene.Children.FindNodes(node => node.Name == "RightRearWheel")?.FirstOrDefault()?.GetComponent<SurfaceEffect>();
+            // _rightRearEffect.SurfaceInput.Albedo = (float4)ColorUint.OrangeRed;
+
+            _scenePicker = new ScenePicker(_scene);
+
 
             // Create a scene renderer holding the scene above
             _sceneRenderer = new SceneRendererForward(_scene);
         }
 
-        // RenderAFrame is called once a frame
-        // RenderAFrame is called once a frame
+
         public override void RenderAFrame()
         {
             SetProjectionAndViewport();
+            //_rightRearEffect.SurfaceInput.Albedo = (float4)ColorUint.OrangeRed;
 
-            _baseTransform.Rotation = new float3(0, M.MinAngle(TimeSinceStart), 0);
+            // _rightRearTransform.Rotation = new float3(0, M.MinAngle(TimeSinceStart), 0);
+            // _bodyTransform.Rotation = new float3(0, M.MinAngle(TimeSinceStart), 0);
 
             // Clear the backbuffer
             RC.Clear(ClearFlags.Color | ClearFlags.Depth);
 
             // Setup the camera 
-            RC.View = float4x4.CreateTranslation(0, 0, 40) * float4x4.CreateRotationX(-(float) Math.Atan(15.0 / 40.0));
+            //RC.View = float4x4.CreateTranslation(0, 0, 40) * float4x4.CreateRotationX(-(float)Math.Atan(15.0 / 40.0));
 
+            RC.View = float4x4.CreateTranslation(0, 0, 40);
             // Render the scene on the current render context
             _sceneRenderer.Render(RC);
+
+            // Setup the camera 
+
+            if (Mouse.LeftButton)
+            {
+                float2 pickPosClip = Mouse.Position * new float2(2.0f / Width, -2.0f / Height) + new float2(-1, 1);
+
+                PickResult newPick = _scenePicker.Pick(RC, pickPosClip).OrderBy(pr => pr.ClipPos.z).FirstOrDefault();
+
+
+
+                if (newPick?.Node != _currentPick?.Node)
+                {
+                    if (_currentPick != null)
+                    {
+                        var ef = _currentPick.Node.GetComponent<DefaultSurfaceEffect>();
+                        ef.SurfaceInput.Albedo = _oldColor;
+                    }
+                    if (newPick != null)
+                    {
+                        var ef = newPick.Node.GetComponent<SurfaceEffect>();
+                        _oldColor = ef.SurfaceInput.Albedo;
+                        ef.SurfaceInput.Albedo = (float4)ColorUint.Blue;
+
+
+
+
+                    }
+                }
+                _currentPick = newPick;
+
+            }
+            // if (_currentPick != null)
+            //     Diagnostics.Debug("The picked object is " + _currentPick.Node.Name);
+            // if (_currentPick != null && _currentPick.Node.Name == "_transformRadHintenLinks")
+
+            _transformRadHintenLinks.Rotation.y += -Keyboard.WSAxis * DeltaTime * 3;
+            // else if (_currentPick != null && _currentPick.Node.Name == " _transformRadHintenRechts")
+            _transformRadHintenRechts.Rotation.y += -Keyboard.WSAxis * DeltaTime * 3;
+            // else if (_currentPick != null && _currentPick.Node.Name == " _transformRadVorneRechts")
+            _transformRadVorneRechts.Rotation.y += -Keyboard.WSAxis * DeltaTime * 3;
+            // else if (_currentPick != null && _currentPick.Node.Name == "  _transformRadVorneLinks")
+            _transformRadVorneLinks.Rotation.y += -Keyboard.WSAxis * DeltaTime * 3;
+
+           // _schaufelTransform.Rotation.y += Keyboard.ADAxis*DeltaTime;
+
+            _bodyTransform.Translation.z += Keyboard.LeftRightAxis / 10;
+            _bodyTransform.Translation.x += Keyboard.WSAxis / 10;
+            _bodyTransform.Rotation.y += Keyboard.ADAxis * DeltaTime;
+
 
             // Swap buffers: Show the contents of the backbuffer (containing the currently rendered frame) on the front buffer.
             Present();
@@ -104,6 +183,6 @@ namespace FuseeApp
             // Back clipping happens at 2000 (Anything further away from the camera than 2000 world units gets clipped, polygons will be cut)
             var projection = float4x4.CreatePerspectiveFieldOfView(M.PiOver4, aspectRatio, 1, 20000);
             RC.Projection = projection;
-        }                
+        }
     }
 }
